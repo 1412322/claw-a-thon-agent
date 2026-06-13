@@ -1,0 +1,12 @@
+{
+  "wizard_step": 9,
+  "project_name": "claw-a-thon-agent",
+  "framework": "FastAPI",
+  "agent_identity": null,
+  "auth_configured": false,
+  "runtime_id": "runtime-769fddac-d8d2-467e-b977-aaa455e0efe4",
+  "memory_id": null,
+  "aip_key_name": null,
+  "cr_repo_name": "111480-abp111750",
+  "endpoint_url": "https://endpoint-90f88e3b-1d58-463e-8c54-bd4fc1d4d8b0.agentbase-runtime.aiplatform.vngcloud.vn"
+}
