@@ -1,0 +1,40 @@
+{
+  "info": {
+    "_postman_id": "b3940503-b5a5-410b-8abe-d3e9e78bc2e4",
+    "name": "echo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53849789"
+  },
+  "item": [
+    {
+      "name": "https://postman-echo.com/get?foo1=bar1&foo2=bar2",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://postman-echo.com/get?foo1=bar1&foo2=bar2",
+          "protocol": "https",
+          "host": [
+            "postman-echo",
+            "com"
+          ],
+          "path": [
+            "get"
+          ],
+          "query": [
+            {
+              "key": "foo1",
+              "value": "bar1"
+            },
+            {
+              "key": "foo2",
+              "value": "bar2"
+            }
+          ]
+        },
+        "description": "Generated from cURL: curl --location 'https://postman-echo.com/get?foo1=bar1&foo2=bar2'"
+      },
+      "response": []
+    }
+  ]
+}

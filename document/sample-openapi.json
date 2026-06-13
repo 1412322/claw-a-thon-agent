@@ -1,0 +1,95 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Tech Team AI Agent API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/projects/": {
+      "get": {
+        "summary": "List all projects",
+        "description": "Returns a list of all projects",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project_id}": {
+      "get": {
+        "summary": "Get project details",
+        "description": "Returns details for a specific project",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Successful response" },
+          "404": { "description": "Project not found" }
+        }
+      }
+    },
+    "/api/v1/projects/upload-doc": {
+      "post": {
+        "summary": "Upload document",
+        "description": "Upload a document to a project",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "project_id": { "type": "string" },
+                  "project_name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Successful upload" },
+          "400": { "description": "Invalid file" }
+        }
+      }
+    },
+    "/api/v1/chat/stream": {
+      "post": {
+        "summary": "Stream chat",
+        "description": "Stream chat response as Server-Sent Events",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "project_id": { "type": "string", "example": "my-project" },
+                  "user_role": { "type": "string", "enum": ["dev", "qc"] },
+                  "message": { "type": "string", "example": "Hello" },
+                  "history": { "type": "array", "items": { "type": "object" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Streaming response" }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Check if the API is healthy",
+        "responses": {
+          "200": { "description": "Service is healthy" }
+        }
+      }
+    }
+  }
+}

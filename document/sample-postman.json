@@ -1,0 +1,33 @@
+{
+  "info": {
+    "name": "Tech Team AI Agent API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "/health"
+      }
+    },
+    {
+      "name": "List Projects",
+      "request": {
+        "method": "GET",
+        "url": "/api/v1/projects/"
+      }
+    },
+    {
+      "name": "Stream Chat",
+      "request": {
+        "method": "POST",
+        "url": "/api/v1/chat/stream",
+        "body": {
+          "mode": "raw",
+          "raw": "{\\\"project_id\\\": \\\"test\\\", \\\"user_role\\\": \\\"dev\\\", \\\"message\\\": \\\"hello\\\"}"
+        }
+      }
+    }
+  ]
+}
