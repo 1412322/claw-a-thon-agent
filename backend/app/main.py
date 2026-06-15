@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from app.api.chat_router import router as chat_router
 from app.api.project_router import router as project_router
 from app.api.test_router import router as test_router
@@ -14,6 +14,20 @@ app = FastAPI(
     description="AI Co-Pilot cho Dev và QC — Global Core + Local Project Knowledge",
     version="1.0.0-demo"
 )
+
+
+# Global exception handler for non-HTTP exceptions only
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Ensure all non-HTTP exceptions return JSON response."""
+    # Don't handle HTTPException - let FastAPI handle it normally
+    if isinstance(exc, HTTPException):
+        raise exc
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Lỗi server: {str(exc)}"}
+    )
 
 app.add_middleware(
     CORSMiddleware,

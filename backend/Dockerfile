@@ -7,8 +7,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy application code (exclude chroma_db)
+COPY app ./app
+COPY static ./static
+
+# Note: .env is provided by AgentBase Runtime at runtime via environment variables
+# Do not COPY .env.example - it would override runtime env vars
+
+# Create empty chroma_db directory (will be mounted as volume in production)
+RUN mkdir -p /app/chroma_db && chmod 755 /app/chroma_db
 
 # Expose port
 EXPOSE 8080
