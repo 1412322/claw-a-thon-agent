@@ -3,7 +3,8 @@ import { GitCompare, X, Loader2, AlertCircle, ArrowRight } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Use relative path for production (same-origin), localhost for dev
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:8000' : ''
 
 export default function DiffViewer({ projectId, initialFilename, initialVersionA, initialVersionB, onClose }) {
   const [filename, setFilename] = useState(initialFilename || '')
@@ -45,11 +46,19 @@ export default function DiffViewer({ projectId, initialFilename, initialVersionA
         })
       })
 
+      // Check content type before parsing JSON
+      const contentType = res.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        // Response is not JSON - read as text to get actual error
+        const text = await res.text()
+        throw new Error(`Lỗi server: ${res.status} - ${text.substring(0, 100)}`)
+      }
+
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail || 'Lỗi phân tích')
       setResult(data)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Đã xảy ra lỗi không xác định')
     } finally {
       setLoading(false)
     }

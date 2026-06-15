@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react'
 import axios from 'axios'
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1'
+// Use relative path for production (same-origin), localhost for dev
+const API_BASE = import.meta.env.DEV ? 'http://localhost:8000/api/v1' : '/api/v1'
 
 export default function APITesting({ projectId, projectName }) {
   const [uploading, setUploading] = useState(false)

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { History, ChevronDown, ChevronUp, Clock, Layers, GitCompare } from 'lucide-react'
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Use relative path for production (same-origin), localhost for dev
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:8000' : ''
 
 function formatDate(iso) {
   const d = new Date(iso)
