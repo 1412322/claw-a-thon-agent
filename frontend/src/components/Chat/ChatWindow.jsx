@@ -30,9 +30,20 @@ export default function ChatWindow() {
   const [error, setError] = useState('')
   const messagesEndRef = useRef(null)
   const textareaRef = useRef(null)
+  const messagesContainerRef = useRef(null)
 
+  // Auto-scroll to bottom on new messages, but don't interrupt manual scrolling
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const shouldAutoScroll = () => {
+      if (!messagesContainerRef.current) return false
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current
+      // If user is within 100px of bottom, auto-scroll
+      return scrollTop + clientHeight >= scrollHeight - 100
+    }
+
+    if (shouldAutoScroll()) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages])
 
   // Reset chat when project changes
@@ -126,7 +137,7 @@ export default function ChatWindow() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {messages.length === 0 && !noProject && (
           <div className="flex flex-col items-center justify-center h-full text-center fade-in-up">
             <div className="text-4xl mb-4">🤖</div>

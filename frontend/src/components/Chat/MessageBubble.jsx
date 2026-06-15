@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Copy, Check } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false)
@@ -25,6 +25,15 @@ function CopyButton({ text }) {
 
 export default function MessageBubble({ message, isStreaming }) {
   const isUser = message.role === 'user'
+
+  // For streaming assistant messages, only render tables when content is stable
+  // This prevents flickering of incomplete markdown tables
+  const shouldRenderMarkdown = useMemo(() => {
+    if (isUser) return false
+    if (!isStreaming) return true
+    // Only render markdown if content is substantial (> 100 chars)
+    return message.content.length > 100
+  }, [isUser, isStreaming, message.content])
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} fade-in-up`}>
@@ -52,9 +61,13 @@ export default function MessageBubble({ message, isStreaming }) {
                 <CopyButton text={message.content} />
               </div>
               <div className={`markdown-content ${isStreaming ? 'typing-cursor' : ''}`}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {message.content}
-                </ReactMarkdown>
+                {shouldRenderMarkdown ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                )}
               </div>
             </>
           )}
