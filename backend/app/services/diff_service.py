@@ -53,8 +53,12 @@ async def analyze_diff(
     Compare 2 versions of a document using Greenode (VNG Cloud).
     Returns structured diff analysis.
     """
+    print(f"[DiffService] Starting diff analysis: {filename} v{version_a} vs v{version_b}")
+
     content_a = get_version_content(project_id, filename, version_a)
     content_b = get_version_content(project_id, filename, version_b)
+
+    print(f"[DiffService] Retrieved content: v{version_a}={len(content_a) if content_a else 0} chars, v{version_b}={len(content_b) if content_b else 0} chars")
 
     if content_a is None:
         raise ValueError(f"Version {version_a} không tồn tại cho file '{filename}'")
@@ -73,28 +77,55 @@ async def analyze_diff(
         content_new=new_content,
     )
 
+    print(f"[DiffService] Prompt length: {len(prompt)} chars")
+
     client = AsyncOpenAI(
         api_key=settings.greenode_api_key,
-        base_url="https://maas-llm-aiplatform-hcm.api.vngcloud.vn/v1"
+        base_url="https://maas-llm-aiplatform-hcm.api.vngcloud.vn/v1",
+        timeout=120.0  # Add timeout for long responses
     )
 
-    response = await client.chat.completions.create(
-        model=settings.greenode_model,
-        messages=[
-            {"role": "system", "content": "Bạn là chuyên gia phân tích tài liệu phần mềm. Hãy trả lời bằng tiếng Việt, định dạng Markdown."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.1,
-        max_tokens=3000
-    )
+    try:
+        print(f"[DiffService] Calling Greenode API with model: {settings.greenode_model}")
+        response = await client.chat.completions.create(
+            model=settings.greenode_model,
+            messages=[
+                {"role": "system", "content": "Bạn là chuyên gia phân tích tài liệu phần mềm. Hãy trả lời bằng tiếng Việt, định dạng Markdown. Trả lời CHI TIẾT và ĐẦY ĐỦ, không rút gọn."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.1,
+            max_tokens=8000  # Increased for complete detailed analysis
+        )
 
-    return {
-        "project_id": project_id,
-        "filename": filename,
-        "version_old": old_ver,
-        "version_new": new_ver,
-        "analysis": response.choices[0].message.content,
-    }
+        analysis_content = response.choices[0].message.content
+        print(f"[DiffService] Diff analysis completed: {len(analysis_content)} chars")
+        print(f"[DiffService] Finish reason: {response.choices[0].finish_reason}")
+
+        # Check if response was truncated
+        if response.choices[0].finish_reason == "length":
+            print("[DiffService] WARNING: Response was truncated due to max_tokens limit!")
+
+        result = {
+            "project_id": project_id,
+            "filename": filename,
+            "version_old": old_ver,
+            "version_new": new_ver,
+            "analysis": analysis_content,
+        }
+        return result
+
+    except Exception as api_error:
+        print(f"[DiffService] Error calling Greenode API: {api_error}")
+        # Re-raise with more context for better error messages
+        error_msg = str(api_error)
+        if "401" in error_msg or "authentication" in error_msg.lower():
+            raise RuntimeError(f"Lỗi xác thực với Greenode API. Vui lòng kiểm tra API key.")
+        elif "404" in error_msg or "not found" in error_msg.lower():
+            raise RuntimeError(f"Mô hình '{settings.greenode_model}' không tìm thấy.")
+        elif "429" in error_msg or "rate limit" in error_msg.lower():
+            raise RuntimeError("Vượt quá giới hạn yêu cầu. Vui lòng thử lại sau.")
+        else:
+            raise RuntimeError(f"Lỗi khi gọi Greenode API: {error_msg}")
 
 
 def extract_text_from_bytes(file_bytes: bytes, filename: str) -> str:
